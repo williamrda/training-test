@@ -1,0 +1,27 @@
+{
+  "name": "cohesity-fortknox-explainer",
+  "private": true,
+  "version": "1.0.0",
+  "description": "15-second 16:9 motion-graphics explainer for Cohesity FortKnox (Remotion).",
+  "scripts": {
+    "studio": "remotion studio",
+    "music": "python3 scripts/make_music.py",
+    "vo": "python3 scripts/make_vo.py",
+    "render": "node scripts/render.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/inter-tight": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@remotion/bundler": "4.0.528",
+    "@remotion/cli": "4.0.528",
+    "@remotion/renderer": "4.0.528",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "remotion": "4.0.528"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.8",
+    "typescript": "5.8.3"
+  }
+}
