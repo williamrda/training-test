@@ -1,9 +1,12 @@
-# Cohesity FortKnox — 15 s motion explainer
+# Cohesity FortKnox — 30 s motion explainer
 
-A 15.000-second, 1920×1080, 30 fps motion-graphics explainer built in [Remotion](https://remotion.dev).
-It uses one continuous 3D world (CSS 3D with real depth), a single camera that whips between
-**9 shots**, and kinetic type that runs per glyph. Picture and sound are both locked to a
-**132 BPM** grid, where 33 beats come to exactly 15 s.
+A 30.000-second, 1920×1080, 30 fps motion-graphics explainer built in [Remotion](https://remotion.dev).
+It uses one continuous 3D world (CSS 3D with real depth) and a single camera that whips between
+**9 shots**, with kinetic type that runs per glyph.
+
+The story is told in **6 sections of exactly 5 s**, so each message stays on screen for at least 5 s.
+Where a section holds two camera angles, its text builds up and stays for the full section.
+Picture and sound are both locked to a **132 BPM** grid, where 11 beats come to exactly 5 s.
 
 ## Render it
 
@@ -30,24 +33,23 @@ npm run render                         # -> out/fortknox-explainer.mp4 (H.264 + 
 | Stem | Level | Notes |
 |---|---|---|
 | VO | ~ -16 dBFS RMS per line, peaks ≤ -1.5 dBFS | `public/vo.wav` |
-| Music bed | ~ -24 dBFS RMS in the file, played at 0.5 (≈ -30 dBFS) | `public/music.wav` |
+| Music bed | ~ -24 dBFS RMS in the file (the air-gap breakdown and end card drop ~5 dB), played at 0.5 (≈ -30 dBFS) | `public/music.wav` |
 | Ducking | Music drops a further ~5 dB (0.5 → 0.28) while any VO line plays | Driven by the same cue file |
 
 The music therefore sits roughly **12–19 dB below the voice**.
 
-## Shot list (132 BPM, beat = 13.64 frames)
+## Section / shot list (132 BPM, 11 beats = 5 s = 150 frames)
 
-| # | Beats | Frames | Camera | On screen | VO |
-|---|---|---|---|---|---|
-| 1 | 0–4 | 0–55 | Push in low on production towers; red infection wave, shock ring | THREAT DETECTED · **RANSOMWARE** · hits production. | "Ransomware hits production…" |
-| 2 | 4–7 | 55–95 | Whip right to the backup stack as it cracks red | then it hunts **YOUR BACKUPS** | "then hunts your backups." |
-| 3 | 7–11 | 95–150 | Rise to the vault; its panels fly in and assemble on a spring | CYBER VAULTING · Cohesity **FortKnox** | "Cohesity FortKnox vaults a clean copy" |
-| 4 | 11–15 | 150–205 | Along the bridge: the transfer window opens, packets cross, the bridge retracts and leaves a gap | TRANSFER WINDOW ● OPEN → ● CLOSED · **VIRTUAL AIR GAP** | "behind a virtual air gap." |
-| 5 | 15–19 | 205–259 | Tight on the vault door; three rings slam on three beats, then the hex stream and the WORM padlock | **IMMUTABLE / ENCRYPTED / WORM-LOCKED** | "Immutable. Encrypted. Locked." |
-| 6 | 19–23 | 259–314 | Low angle; two keys slide in and turn one after the other | APPROVALS 0/2 → 2/2 · **QUORUM** | "Two approvers to touch it." |
-| 7 | 23–26 | 314–355 | Top-down orbit; a scan plane sweeps the vaulted data | THREAT SCAN 0→100% · **SCANNED CLEAN ✓** | "Scanned clean," |
-| 8 | 26–29 | 355–395 | Wide tracking shot; the door swings open, data arcs back and the world turns teal | **RECOVERED FAST** · granular · original or alternate location | "recovered fast." |
-| 9 | 29–33 | 395–450 | Full-world pull-back with a halo | **Cohesity FortKnox** · Isolate. Lock. Recover. · managed SaaS or self-managed on-prem | "Cohesity FortKnox." |
+| Section | Time | Shots (camera) | On screen (builds, holds 5 s) | VO |
+|---|---|---|---|---|
+| 1 Threat | 0–5 s | Push in on production towers as a red infection wave hits → whip to the backup stack as it cracks | THREAT DETECTED · **RANSOMWARE** · hits production, then hunts **YOUR BACKUPS** | "Ransomware doesn't stop at production. It hunts your backups, too." |
+| 2 FortKnox | 5–10 s | Rise and orbit as the vault panels fly in and assemble | CYBER VAULTING · Cohesity **FortKnox** · an isolated, immutable copy of your backups · managed cloud vault or self-managed on-prem | "Cohesity FortKnox keeps an isolated, immutable copy of your backups." |
+| 3 Air gap | 10–15 s | Travel along the bridge: the window opens, data crosses, the bridge retracts and leaves a gap | TRANSFER WINDOW ● OPEN → ● CLOSED · **VIRTUAL AIR GAP** · connected only during the window · isolated the rest of the time | "A virtual air gap opens only for the transfer window, then shuts." |
+| 4 Locked down | 15–20 s | Vault door: rings slam on the beat, hex stream, WORM padlock → low angle as two keys turn | TAMPER-PROOF · ✓ IMMUTABLE ✓ ENCRYPTED ✓ WORM-LOCKED ✓ QUORUM (0/2 → 2/2 approvers) | "Inside, data is immutable, encrypted, and locked. Critical actions need two approvers." |
+| 5 Clean recovery | 20–25 s | Top-down while a scan plane sweeps the data → wide shot as the door opens and data arcs home | THREAT SCAN 0→100% · **SCANNED CLEAN ✓** · **RECOVERED FAST** · granular · original or alternate location | "Every copy is scanned clean, then recovered fast." |
+| 6 End card | 25–30 s | Full-world pull-back and slow orbit, with a halo | **Cohesity FortKnox** · Isolate. Lock. Recover. · managed SaaS or self-managed on-prem · cohesity.com/platform/fortknox | "Cohesity FortKnox. Isolate, lock, and recover with confidence." |
+
+Music follows the sections: tension, then the reveal groove, a breakdown for the air gap, a drop with lock hits, a lift for recovery, and a resolve that fades out.
 
 ## Content source
 
@@ -64,7 +66,7 @@ Cohesity, but no Cohesity logo artwork is reproduced.
 ## Files
 
 ```
-src/timing.ts       beat grid + shot boundaries
+src/timing.ts       beat grid + section/shot boundaries
 src/camera.ts       camera keyframes, whip easing, shake, beat pulse
 src/world/          3D primitives + the whole world (stations, vault, bridge, keys, scan, recovery)
 src/hud/            kinetic typography + HUD chrome

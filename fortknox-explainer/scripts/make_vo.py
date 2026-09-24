@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the timed voiceover track -> public/vo.wav (15.000 s, 48 kHz, stereo).
+"""Builds the timed voiceover track -> public/vo.wav (30.000 s, 48 kHz, stereo).
 
 Line text and cue times live in src/vo-cues.json (the picture ducks the music with
 the same cues). Each line is trimmed, fitted into its slot (gently sped up if it runs
@@ -27,7 +27,7 @@ from scipy.signal import butter, sosfilt
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 SR = 48000
-DUR = 15.0
+DUR = 30.0
 MAX_TEMPO = 1.25
 
 

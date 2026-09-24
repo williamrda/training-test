@@ -16,12 +16,12 @@ const ATTACK = beatFrame(1); // ransomware impact on production
 const HUNT = SHOTS[1] + 6; // backups get hit
 const VAULT_IN = SHOTS[2]; // vault assembles
 const GAP = SHOTS[3]; // transfer window
-const GAP_OPEN_END = GAP + 16;
-const GAP_CLOSE = beatFrame(13.6); // window shuts
-const LOCKS = [beatFrame(15), beatFrame(16), beatFrame(17)];
+const GAP_OPEN_END = GAP + 18;
+const GAP_CLOSE = beatFrame(28.5); // window shuts ~3 s into the section
+const LOCKS = [beatFrame(34), beatFrame(35.5), beatFrame(37)];
 const KEY_IN = SHOTS[5];
-const KEY_TURN = [beatFrame(20), beatFrame(21)];
-const SCAN = [SHOTS[6] + 4, SHOTS[7] - 8];
+const KEY_TURN = [beatFrame(40.5), beatFrame(41.5)];
+const SCAN = [SHOTS[6] + 6, SHOTS[7] - 12];
 const RECOVER = SHOTS[7];
 const RESOLVE = SHOTS[8];
 
@@ -30,7 +30,7 @@ const VS = 440; // vault cube size
 const DOOR_X = V.x - VS / 2 - 2; // -x face (towards the backups)
 
 // Recovery wave travels from the vault back to production during shot 8.
-const recoverAt = (f: number, x: number) => ramp(f, RECOVER + 8 + ((V.x - x) / V.x) * 26, RECOVER + 16 + ((V.x - x) / V.x) * 26);
+const recoverAt = (f: number, x: number) => ramp(f, RECOVER + 10 + ((V.x - x) / V.x) * 30, RECOVER + 18 + ((V.x - x) / V.x) * 30);
 
 // ---------------------------------------------------------------- floor + labels
 const Floor: React.FC<{f: number}> = ({f}) => {
@@ -390,9 +390,10 @@ const AirGap: React.FC<{f: number}> = ({f}) => {
   }
   // data packets crossing while the window is open
   const packets = [];
-  for (let i = 0; i < 9; i++) {
-    const t0 = GAP_OPEN_END - 2 + i * 2.2;
-    const t = clamp((f - t0) / 14);
+  for (let i = 0; i < 26; i++) {
+    const t0 = GAP_OPEN_END - 2 + i * 3;
+    if (t0 + 22 > GAP_CLOSE + 4) break;
+    const t = clamp((f - t0) / 22);
     if (t <= 0 || t >= 1) continue;
     const x = BRIDGE_A + (BRIDGE_B - BRIDGE_A) * Easing.inOut(Easing.cubic)(t);
     packets.push(<Box key={i} x={x} y={-40 - Math.sin(t * Math.PI) * 20} z={V.z + (i % 3 - 1) * 30} w={34} h={34} d={34} color="#0f4a3c" glow={C.teal} glowAmt={1} rotY={t * 180} />);
@@ -483,8 +484,8 @@ const Recover: React.FC<{f: number}> = ({f}) => {
   const x0 = DOOR_X - 30;
   const x1 = P.x + 120;
   for (let i = 0; i < 22; i++) {
-    const t0 = RECOVER + 6 + i * 1.1;
-    const t = clamp((f - t0) / 20);
+    const t0 = RECOVER + 6 + i * 1.5;
+    const t = clamp((f - t0) / 24);
     if (t <= 0 || t >= 1) continue;
     const e = Easing.inOut(Easing.cubic)(t);
     const x = x0 + (x1 - x0) * e;

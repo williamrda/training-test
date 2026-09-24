@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Synthesises the 132 BPM music bed -> public/music.wav (15.000 s, 48 kHz, stereo).
+"""Synthesises the 132 BPM music bed -> public/music.wav (30.000 s, 48 kHz, stereo).
 
 Everything is locked to the same beat grid as the picture (src/timing.ts):
-33 beats = 15 s, shots start on beats 0,4,7,11,15,19,23,26,29.
+66 beats = 30 s, six 11-beat (5 s) sections; camera shots start on beats 0,6,11,22,33,39,44,50,55.
 
-  beats 0-6   tension: half-time kick, sub drone, ticking hats, riser into the reveal
-  beat  7     FortKnox reveal: impact, full four-on-the-floor groove (A minor)
-  beats 15-17 three hits under IMMUTABLE / ENCRYPTED / WORM-LOCKED
-  beat  26    recovery lift (brighter arp)
-  beat  29    final impact + resolve chord, rings out to 15 s
+  beats  0-11  threat: half-time kick, sub drone, ticking hats, riser into the reveal
+  beats 11-22  FortKnox reveal: impact, full four-on-the-floor groove (A minor)
+  beats 22-33  air gap: breakdown (no kick/bass), thud when the window shuts, riser
+  beats 33-44  locked down: impact, groove, hits under IMMUTABLE / ENCRYPTED / WORM, key clicks
+  beats 44-55  scan + recover: brighter arp lift, riser
+  beats 55-66  end card: final impact, resolve chord, soft heartbeat, fade out
 
 The bed is mastered deliberately quiet (~ -24 dBFS RMS) so the VO sits well on top.
 Requires: numpy, scipy.
@@ -22,9 +23,9 @@ from scipy.signal import butter, sosfilt, fftconvolve
 SR = 48000
 BPM = 132
 BEAT = 60 / BPM
-DUR = 33 * BEAT  # 15.000 s
+DUR = 66 * BEAT  # 30.000 s
 N = int(round(DUR * SR))
-SHOT_BEATS = [0, 4, 7, 11, 15, 19, 23, 26, 29]
+SHOT_BEATS = [0, 6, 11, 22, 33, 39, 44, 50, 55]
 rng = np.random.default_rng(132)
 
 L = np.zeros(N)
@@ -134,15 +135,14 @@ def riser(beats):
 
 
 # ---------------------------------------------------------------- tonal parts
-CHORDS = {  # beat -> midi notes (A minor world)
-    7: [57, 60, 64, 71],   # Am(add9-ish)
-    11: [53, 57, 60, 64],  # Fmaj7
-    15: [48, 55, 60, 64],  # C
-    19: [55, 59, 62, 67],  # G
-    23: [57, 60, 64, 67],  # Am7
-    26: [53, 57, 60, 65],  # F
-}
-ROOTS = {7: 33, 11: 29, 15: 36, 19: 31, 23: 33, 26: 29}
+PROG = [  # 4-beat bars from the reveal onwards (A minor world)
+    ([57, 60, 64, 71], 33),  # Am(add9)
+    ([53, 57, 60, 64], 29),  # Fmaj7
+    ([48, 55, 60, 64], 36),  # C
+    ([55, 59, 62, 67], 31),  # G
+]
+CHORDS = {b: PROG[i % 4][0] for i, b in enumerate(range(11, 55, 4))}
+ROOTS = {b: PROG[i % 4][1] for i, b in enumerate(range(11, 55, 4))}
 
 
 def pad(notes, beats, bright=900):
@@ -177,6 +177,7 @@ def chord_at(b):
 
 
 # ---------------------------------------------------------------- arrangement
+# sections (beats): 0 threat | 11 FortKnox | 22 air gap | 33 locked down | 44 scan+recover | 55 end card
 sc = np.ones(N)  # sidechain gain from kicks (applied to bass + pads)
 
 
@@ -190,88 +191,117 @@ def duck_at(beat, depth=0.65, rel=0.2):
     sc[s: s + n] = np.minimum(sc[s: s + n], g)
 
 
-# intro (beats 0-6): half-time kick, drone, ticking hats, riser into the reveal
+def drums(b0, b1, hats=True):
+    for b in range(b0, b1):
+        add(kick(), b, 0.95)
+        duck_at(b)
+        if b % 2 == 0:
+            add(clap(), b, 0.55, pan=0.05)
+        if hats:
+            add(hat(True), b + 0.5, 0.28, pan=0.2)
+            for s16 in (0.25, 0.75):
+                add(hat(), b + s16, 0.16, pan=-0.3)
+
+
+def stab(k, gain=0.12):
+    n = int(0.5 * SR)
+    t = np.arange(n) / SR
+    return sum(np.sin(2 * np.pi * f * t) for f in (220 * (1 + k * 0.12), 331, 587 * (1 + k * 0.06), 1245)) * env_exp(n, 0.09) * gain
+
+
+# 1 threat (0-11): half-time kick, drone, ticking hats, riser into the reveal
 add(impact(), 0, 0.55)
-for b in [0, 2, 4, 6]:
+for b in range(0, 11, 2):
     add(kick(punch=0.9), b, 0.8)
     duck_at(b, 0.5)
-for b16 in range(0, 7 * 4):
-    b = b16 / 4
-    add(hat(), b, 0.18 + 0.12 * (b16 % 2), pan=0.35 if b16 % 2 else -0.35)
-drone_n = t_of(7)
+for b16 in range(0, 11 * 4):
+    add(hat(), b16 / 4, 0.18 + 0.12 * (b16 % 2), pan=0.35 if b16 % 2 else -0.35)
+drone_n = t_of(11)
 tt = np.arange(drone_n) / SR
 drone = (np.sin(2 * np.pi * 55 * tt) + 0.5 * np.sin(2 * np.pi * 55.4 * tt) + 0.3 * filt(saw(110, drone_n), 'lowpass', 300))
 drone *= np.minimum(1, tt / 0.3) * 0.22
 tension = np.zeros(N)
 tension[:drone_n] = drone
-add(riser(3), 4, 0.55)
+add(riser(3), 8, 0.55)
 
-# groove (beats 7-29)
-add(impact(), 7, 0.9)
-for b in range(7, 29):
-    add(kick(), b, 0.95)
-    duck_at(b)
-    if b % 2 == 0:
-        add(clap(), b, 0.55, pan=0.05)
-    add(hat(True), b + 0.5, 0.28, pan=0.2)
-    for s16 in (0.25, 0.75):
-        add(hat(), b + s16, 0.16, pan=-0.3)
+# 2 FortKnox (11-22): impact + full groove
+add(impact(), 11, 0.9)
+drums(11, 22)
 
-# bass: rolling off-beat 16ths on the chord root
-for b16 in range(7 * 4, 29 * 4):
+# 3 air gap (22-33): breakdown — no kick, open hats, pads only; a thud when the window shuts
+add(kick(), 22, 0.8)
+for b in range(22, 33):
+    add(hat(True), b + 0.5, 0.2, pan=0.2)
+add(impact(), 28.5, 0.4)
+add(riser(3), 30, 0.5)
+
+# 4 locked down (33-44): impact, groove, lock hits and two key clicks
+add(impact(), 33, 0.9)
+drums(33, 44)
+for k, b in enumerate([34, 35.5, 37]):
+    add(stab(k), b, 1.0)
+for b in (40.5, 41.5):
+    add(stab(2, 0.08)[: int(0.12 * SR)], b, 1.0)
+
+# 5 scan + recover (44-55): groove with a brighter arp, riser into the end card
+drums(44, 55)
+add(riser(3), 52, 0.45)
+
+# bass: rolling off-beat 16ths on the chord root (not in the breakdown)
+for b16 in range(11 * 4, 55 * 4):
     b = b16 / 4
-    if b16 % 4 == 0:
+    if b16 % 4 == 0 or 22 <= b < 33:
         continue
-    root = ROOTS[chord_at(b)]
-    m = root + (12 if b16 % 4 == 2 else 0)
+    m = ROOTS[chord_at(b)] + (12 if b16 % 4 == 2 else 0)
     add(bass_note(m, BEAT / 4 * 0.95), b, 0.9)
 
 # pads
 pad_bus = np.zeros(N)
 beats_sorted = sorted(CHORDS)
 for i, b in enumerate(beats_sorted):
-    nb = beats_sorted[i + 1] if i + 1 < len(beats_sorted) else 29
-    p = pad(CHORDS[b], nb - b, bright=1400 if b >= 26 else 900)
+    nb = beats_sorted[i + 1] if i + 1 < len(beats_sorted) else 55
+    p = pad(CHORDS[b], nb - b, bright=1400 if b >= 44 else 700 if 22 <= b < 33 else 900)
     s = t_of(b)
-    pad_bus[s: s + len(p)] += p
+    pad_bus[s: s + len(p)] += p * (1.4 if 22 <= b < 33 else 1.0)
 
-# arp: 16ths through chord tones, brighter from the recovery lift
+# arp: 16ths through chord tones; filtered in the breakdown, brighter for the recovery
 arp_L = np.zeros(N)
 arp_R = np.zeros(N)
-for b16 in range(7 * 4, 29 * 4):
+for b16 in range(11 * 4, 55 * 4):
     b = b16 / 4
     notes = CHORDS[chord_at(b)]
     m = notes[(b16 * 3) % len(notes)] + 12
-    bright = 5200 if b >= 26 else 2600
-    x = pluck(m, bright=bright) * (1.25 if b >= 26 else 1.0)
+    if 22 <= b < 33:
+        x = pluck(m, bright=1400) * 0.7
+    else:
+        x = pluck(m, bright=5200 if b >= 44 else 2600) * (1.25 if b >= 44 else 1.0)
     s = t_of(b)
     e = min(N, s + len(x))
     pan = 0.4 * np.sin(b16 * 0.7)
     arp_L[s:e] += x[: e - s] * np.sqrt(0.5 * (1 - pan))
     arp_R[s:e] += x[: e - s] * np.sqrt(0.5 * (1 + pan))
+
+# 6 end card (55-66): final impact, resolve chord, a soft heartbeat and a sparse arp that fades out
+add(impact(), 55, 0.95)
+for m in (69, 72, 76, 81):
+    add(pluck(m, 1.2, 4000) * 1.4, 55, 1.0, pan=0.3 if m % 2 else -0.3)
+for b in range(57, 63, 2):
+    add(kick(punch=0.7), b, 0.45)
+for b8 in range(56 * 2, 65 * 2):
+    b = b8 / 2
+    m = [69, 76, 72, 79][b8 % 4]
+    x = pluck(m, 0.3, 3000) * 0.8 * max(0.0, 1 - (b - 56) / 9)
+    add(x, b, 1.0, pan=0.35 if b8 % 2 else -0.35)
+end_n = N - t_of(55)
+end_pad = pad([45, 57, 60, 64, 71, 76], 66 - 55, bright=1800)[:end_n]
+end_env = np.minimum(1, np.arange(end_n) / (0.02 * SR)) * np.exp(-np.arange(end_n) / (3.2 * SR))
+
 # dotted-eighth delay on the arp
 d = int(0.75 * BEAT * SR)
 for bus in (arp_L, arp_R):
     tap = np.zeros(N)
     tap[d:] = bus[:-d] * 0.35
     bus += filt(tap, 'lowpass', 3000)
-
-# three lock hits (beats 15, 16, 17) — metallic stab
-for k, b in enumerate([15, 16, 17]):
-    n = int(0.5 * SR)
-    t = np.arange(n) / SR
-    stab = sum(np.sin(2 * np.pi * f * t) for f in (220 * (1 + k * 0.12), 331, 587 * (1 + k * 0.06), 1245)) * env_exp(n, 0.09)
-    add(stab * 0.12, b, 1.0)
-
-# recovery lift riser into beat 26 and resolve at 29
-add(riser(2), 24, 0.35)
-add(riser(2), 27, 0.45)
-add(impact(), 29, 0.95)
-end_n = N - t_of(29)
-end_pad = pad([45, 57, 60, 64, 71, 76], 33 - 29, bright=1800)[:end_n]
-end_env = np.minimum(1, np.arange(end_n) / (0.02 * SR)) * np.exp(-np.arange(end_n) / (1.6 * SR))
-for m in (69, 72, 76, 81):
-    add(pluck(m, 1.2, 4000) * 1.4, 29, 1.0, pan=0.3 if m % 2 else -0.3)
 
 # whooshes on every camera whip (shots 2-9)
 for b in SHOT_BEATS[1:]:
@@ -285,7 +315,7 @@ padL = pad_bus.copy()
 padR = pad_bus.copy()
 padR[240:] = pad_bus[:-240]  # Haas width
 end_full = np.zeros(N)
-end_full[t_of(29):] = end_pad * end_env * 1.6
+end_full[t_of(55):] = end_pad * end_env * 1.6
 L += (padL + end_full) * sc + arp_L + tension * sc
 R += (padR + end_full) * sc + arp_R + tension * sc
 
@@ -310,8 +340,8 @@ mix *= target_rms / rms
 peak = np.max(np.abs(mix))
 if peak > 10 ** (-3 / 20):
     mix *= 10 ** (-3 / 20) / peak
-fade = int(0.12 * SR)
-mix[-fade:] *= np.linspace(1, 0, fade)[:, None]
+fade = int(1.2 * SR)  # tail fades over the last 1.2 s
+mix[-fade:] *= np.linspace(1, 0, fade)[:, None] ** 2
 mix[: int(0.004 * SR)] *= np.linspace(0, 1, int(0.004 * SR))[:, None]
 
 out = os.path.join(os.path.dirname(__file__), '..', 'public', 'music.wav')

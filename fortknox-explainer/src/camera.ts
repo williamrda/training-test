@@ -16,23 +16,23 @@ export const V = {x: 3300, z: 0}; // FortKnox vault
 const OPEN = cam(-120, -420, 0, -62, -26, 1900, -6);
 const KEYS: {from: Cam; to: Cam}[] = [
   // 1 production under attack — low hero push
-  {from: cam(0, -140, 0, -28, -14, 1050, 0), to: cam(40, -130, 0, -18, -11, 860, 2)},
+  {from: cam(0, -140, 0, -30, -14, 1100, 0), to: cam(60, -130, 0, -12, -10, 820, 2)},
   // 2 whip right to the backups
-  {from: cam(B.x, -120, 0, 24, -20, 900, -3), to: cam(B.x + 40, -110, 0, 32, -17, 780, 0)},
-  // 3 FortKnox reveal — rise up to the vault
-  {from: cam(V.x, -300, 0, -36, -12, 1500, 0), to: cam(V.x, -300, 0, -24, -9, 1260, 0)},
-  // 4 air gap — side-on along the bridge
-  {from: cam((B.x + V.x) / 2 + 250, -120, -120, 58, -20, 1250, 0), to: cam((B.x + V.x) / 2 + 330, -120, -120, 66, -18, 1150, 0)},
-  // 5 immutable / encrypted / locked — tight on the door
-  {from: cam(V.x - 260, -230, -230, 82, -6, 980, 0), to: cam(V.x - 260, -230, -230, 76, -5, 900, 0)},
+  {from: cam(B.x, -120, 0, 22, -20, 950, -3), to: cam(B.x + 60, -110, 0, 38, -15, 760, 0)},
+  // 3 FortKnox reveal — rise up to the vault, slow orbit while it assembles
+  {from: cam(V.x, -300, 0, -44, -12, 1550, 0), to: cam(V.x, -280, 0, -14, -7, 1200, 0)},
+  // 4 air gap — travel along the bridge as the window opens and shuts
+  {from: cam((B.x + V.x) / 2 + 150, -120, -120, 48, -22, 1350, 0), to: cam((B.x + V.x) / 2 + 380, -130, -120, 70, -16, 1150, 0)},
+  // 5 immutable / encrypted / locked — on the door
+  {from: cam(V.x - 260, -230, -230, 86, -6, 1020, 0), to: cam(V.x - 260, -230, -230, 72, -4, 880, 0)},
   // 6 quorum — two keys, low angle
-  {from: cam(V.x - 320, -200, -220, 62, 2, 920, 2), to: cam(V.x - 320, -210, -220, 70, 0, 840, 0)},
+  {from: cam(V.x - 320, -200, -220, 60, 2, 940, 2), to: cam(V.x - 320, -210, -220, 74, 0, 820, 0)},
   // 7 scan — high top-down orbit
-  {from: cam(V.x, -300, 0, 20, -58, 1150, 0), to: cam(V.x, -300, 0, 36, -60, 1080, 0)},
+  {from: cam(V.x, -300, 0, 12, -58, 1180, 0), to: cam(V.x, -300, 0, 42, -62, 1050, 0)},
   // 8 recover — wide tracking arc back to production
-  {from: cam(V.x / 2, -420, 0, -4, -26, 2350, 0), to: cam(V.x / 2 - 150, -420, 0, -10, -24, 2150, 0)},
-  // 9 resolve — full world, calm
-  {from: cam(V.x / 2, -520, 0, 0, -34, 3000, 0), to: cam(V.x / 2, -520, 0, 0, -30, 2800, 0)},
+  {from: cam(V.x / 2 + 150, -420, 0, -2, -26, 2350, 0), to: cam(V.x / 2 - 250, -420, 0, -12, -23, 2150, 0)},
+  // 9 resolve — full world, slow orbit
+  {from: cam(V.x / 2, -520, 0, -8, -34, 3050, 0), to: cam(V.x / 2, -500, 0, 8, -28, 2700, 0)},
 ];
 
 const TRANSITION = 17; // frames; fast whip with hard accel/decel
