@@ -1,0 +1,12 @@
+{
+  "voice": "en-US-AndrewNeural",
+  "lines": [
+    {"id": "01", "start": 0.40, "end": 2.50, "text": "Ransomware doesn't stop at production."},
+    {"id": "02", "start": 2.85, "end": 4.70, "text": "It hunts your backups, too."},
+    {"id": "03", "start": 5.40, "end": 9.60, "text": "Cohesity FortKnox keeps an isolated, immutable copy of your backups."},
+    {"id": "04", "start": 10.40, "end": 14.60, "text": "A virtual air gap opens only for the transfer window, then shuts."},
+    {"id": "05", "start": 15.40, "end": 19.70, "text": "Inside, data is immutable, encrypted, and locked. Critical actions need two approvers."},
+    {"id": "06", "start": 20.40, "end": 24.50, "text": "Every copy is scanned clean, then recovered fast."},
+    {"id": "07", "start": 25.40, "end": 29.20, "text": "Cohesity FortKnox. Isolate, lock, and recover with confidence."}
+  ]
+}
